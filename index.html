@@ -2166,10 +2166,9 @@
     const countEl = document.getElementById('count');
     const secoes  = document.querySelectorAll('.menu-section');
 
-    // Todos os produtos ficam sempre visíveis — a faixa de categorias serve
-    // apenas de navegação: clicar rola até a seção, e o botão ativo também
-    // acompanha a rolagem manual do usuário (scroll-spy), sem nunca esconder
-    // as demais categorias.
+    // Todos os produtos ficam sempre visíveis — a faixa de categorias é só um
+    // indicador: clicar destaca o botão na hora (sem mover a tela), e o
+    // destaque também acompanha a rolagem manual do usuário (scroll-spy).
     countEl.textContent = `${cards.length} itens no cardápio`;
 
     function marcarAtiva(cat) {
@@ -2188,28 +2187,18 @@
     }
 
     // Delegação de evento: um único listener cobre todos os botões de categoria.
-    let scrollSpySuspenso = false;
-    let scrollSpyTimer = null;
+    // O clique só destaca o botão — não move a página, para não criar aquele
+    // "pulo" de rolagem automática que atrapalha o uso no celular.
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.filtro-btn');
       if (!btn) return;
-      const cat = btn.dataset.cat;
-      const alvo = document.getElementById(`cat-${cat}`);
-      if (!alvo) return;
-      marcarAtiva(cat);
-      // Suspende o scroll-spy durante a rolagem suave, evitando que o destaque
-      // "pisque" em outra categoria enquanto a página ainda está em movimento.
-      scrollSpySuspenso = true;
-      alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      clearTimeout(scrollSpyTimer);
-      scrollSpyTimer = setTimeout(() => { scrollSpySuspenso = false; }, 700);
+      marcarAtiva(btn.dataset.cat);
     });
 
     // Scroll-spy: destaca automaticamente o botão da categoria cuja seção está
     // no topo da área visível enquanto o usuário rola a página manualmente.
     if ('IntersectionObserver' in window && secoes.length) {
       const spyObserver = new IntersectionObserver((entries) => {
-        if (scrollSpySuspenso) return;
         const visiveis = entries.filter(en => en.isIntersecting);
         if (!visiveis.length) return;
         visiveis.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
