@@ -1361,21 +1361,24 @@
         padding: 20px 14px 56px;
       }
 
+      /* 2 colunas sempre, mesmo nos celulares mais estreitos (iPhone SE, mini
+         etc.) — as alturas de imagem herdam do breakpoint de 640px, já
+         proporcionais para card de 2 colunas (não para card de largura total). */
       .prod-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
 
-      .prod-img-wrap {
-        height: 180px;
+      .prod-body {
+        padding: 12px;
       }
 
-      .prod-card[data-cat="bebida"] .prod-img-wrap {
-        height: 200px;
+      .prod-name {
+        font-size: 16px;
       }
 
-      .prod-card[data-cat="doce"] .prod-img-wrap {
-        height: 210px;
+      .prod-price {
+        font-size: 19px;
       }
 
       .hero {
