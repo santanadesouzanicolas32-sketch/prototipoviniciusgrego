@@ -255,24 +255,26 @@
       background: var(--bg);
     }
 
-    /* Viewport: recorta a faixa de filtros e captura o gesto de arrastar (mouse/touque) */
+    /* Viewport: rolagem horizontal nativa do navegador — sem animação automática
+       e sem clones, para que o botão nunca "fuja" do dedo/cursor do cliente.
+       Barra de rolagem escondida visualmente, mas o gesto continua funcionando. */
     .filtros-viewport {
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
       padding-bottom: 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      cursor: grab;
-      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
 
-    .filtros-viewport.dragging {
-      cursor: grabbing;
+    .filtros-viewport::-webkit-scrollbar {
+      display: none;
     }
 
-    /* Track: contém o grupo original + a cópia (clonada via JS) lado a lado, deslizando sem costura */
     .filtros-track {
       display: flex;
-      width: max-content;
-      will-change: transform;
     }
 
     .filtros-inner {
@@ -338,6 +340,46 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
+    }
+
+    /* Cada categoria é uma seção sempre visível — a faixa de filtros apenas
+       rola a página até aqui. scroll-margin-top compensa o header + a faixa
+       de filtros, que ficam fixos (sticky) sobre o conteúdo. */
+    .menu-section {
+      margin-bottom: 48px;
+      scroll-margin-top: calc(var(--header-h, 89px) + var(--filtros-h, 76px) + 16px);
+    }
+
+    .menu-section:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .menu-section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .menu-section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 1.5px;
+      color: var(--text);
+    }
+
+    .menu-section-title span {
+      color: var(--amber);
+    }
+
+    .menu-section-count {
+      font-size: 12px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* ══════════ PRODUCT CARD ══════════ */
@@ -1196,6 +1238,14 @@
         font-size: 24px;
       }
 
+      .menu-section {
+        margin-bottom: 36px;
+      }
+
+      .menu-section-title {
+        font-size: 18px;
+      }
+
       .prod-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 14px;
@@ -1407,20 +1457,6 @@
     .prod-card:nth-child(13) { animation-delay: 0.6s; }
     .prod-card:nth-child(14) { animation-delay: 0.65s; }
     .prod-card:nth-child(15) { animation-delay: 0.7s; }
-
-    /* hide filtered cards */
-    .prod-card.hidden {
-      display: none;
-    }
-
-    /* no results */
-    .no-results {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-dim);
-      font-size: 15px;
-    }
   </style>
 </head>
 
@@ -1453,7 +1489,7 @@
     <p>Lanches artesanais preparados na hora, com ingredientes selecionados e aquele sabor que não tem igual.</p>
   </section>
 
-  <!-- ═══ FILTROS: Botões de categoria que filtram os produtos exibidos. Ao clicar em uma categoria, apenas os cards daquela seção ficam visíveis ═══ -->
+  <!-- ═══ FILTROS: Navegação por categoria. Todos os produtos ficam sempre visíveis — clicar num botão apenas rola a página suavemente até a seção correspondente, e o botão ativo acompanha a rolagem manual do usuário ═══ -->
   <div class="filtros-wrap">
     <div class="filtros-viewport" id="filtrosViewport">
       <div class="filtros-track" id="filtrosTrack">
@@ -1467,14 +1503,18 @@
     </div>
   </div>
 
-  <!-- ═══ MAIN: Área principal do site contendo todos os cards de produtos organizados por categoria ═══ -->
+  <!-- ═══ MAIN: Área principal do site. Todas as categorias ficam sempre visíveis, cada uma em sua própria seção ═══ -->
   <main class="main-section">
     <div class="section-title">NOSSO <span>CARDÁPIO</span></div>
     <div class="section-count" id="count">0 itens</div>
 
-    <div class="prod-grid" id="prodGrid">
-
-      <!-- ════════ TRADICIONAIS: Seção dos produtos do cardápio tradicional — churrascos no pão francês com combinações clássicas ════════ -->
+    <!-- ════════ TRADICIONAIS: Seção dos produtos do cardápio tradicional — churrascos no pão francês com combinações clássicas ════════ -->
+    <section class="menu-section" id="cat-tradicional" data-cat="tradicional">
+      <div class="menu-section-header">
+        <h2 class="menu-section-title">🍔 Grego no <span>Pão Francês</span></h2>
+        <span class="menu-section-count">8 itens</span>
+      </div>
+      <div class="prod-grid">
       <div class="prod-card" data-cat="tradicional" data-name="Grego Tradicional" data-price="13.00">
         <div class="prod-img-wrap">
           <img src="assets/images/01-grego-tradicional.webp"
@@ -1605,7 +1645,16 @@
         </div>
       </div>
 
-      <!-- ════════ ESPECIAIS: Seção de produtos diferenciados — versões premium servidas na baguete com recheios extras ════════ -->
+      </div>
+    </section>
+
+    <!-- ════════ ESPECIAIS: Seção de produtos diferenciados — versões premium servidas na baguete com recheios extras ════════ -->
+    <section class="menu-section" id="cat-especial" data-cat="especial">
+      <div class="menu-section-header">
+        <h2 class="menu-section-title">🔥 Grego na <span>Baguete</span></h2>
+        <span class="menu-section-count">8 itens</span>
+      </div>
+      <div class="prod-grid">
       <div class="prod-card" data-cat="especial" data-name="Grego do Hexa" data-price="30.00">
         <div class="prod-img-wrap">
           <img src="assets/images/18-grego-hexa.webp"
@@ -1737,7 +1786,16 @@
         </div>
       </div>
 
-      <!-- ════════ BEBIDAS: Seção de bebidas disponíveis — refrigerantes, sucos e água para acompanhar o lanche ════════ -->
+      </div>
+    </section>
+
+    <!-- ════════ BEBIDAS: Seção de bebidas disponíveis — refrigerantes, sucos e água para acompanhar o lanche ════════ -->
+    <section class="menu-section" id="cat-bebida" data-cat="bebida">
+      <div class="menu-section-header">
+        <h2 class="menu-section-title">🥤 <span>Bebidas</span></h2>
+        <span class="menu-section-count">7 itens</span>
+      </div>
+      <div class="prod-grid">
       <div class="prod-card featured-drink" data-cat="bebida" data-name="Suco Natural" data-price="12.00">
         <div class="prod-img-wrap">
           <img src="assets/images/16-suco-natural.webp"
@@ -1851,7 +1909,16 @@
         </div>
       </div>
 
-      <!-- ════════ DOCES: Seção de sobremesas artesanais ════════ -->
+      </div>
+    </section>
+
+    <!-- ════════ DOCES: Seção de sobremesas artesanais ════════ -->
+    <section class="menu-section" id="cat-doce" data-cat="doce">
+      <div class="menu-section-header">
+        <h2 class="menu-section-title">🍮 <span>Doces</span></h2>
+        <span class="menu-section-count">1 item</span>
+      </div>
+      <div class="prod-grid">
       <div class="prod-card" data-cat="doce" data-name="Pudim Artesanal" data-price="15.00">
         <div class="prod-img-wrap">
           <img src="assets/images/19-pudim-artesanal.webp"
@@ -1869,7 +1936,8 @@
         </div>
       </div>
 
-    </div>
+      </div>
+    </section>
 
     <!-- ═══ INFORMAÇÕES DO CARDÁPIO: Bloco com horário de funcionamento, endereço, formas de pagamento e informações úteis para o cliente ═══ -->
     <div class="menu-info">
@@ -2089,147 +2157,69 @@
     const WHATSAPP_NUMBER = '5511947620065'; // formato: 55 + DDD + número (sem +, espaços ou traços)
 
     // ═══════════════════════════════════════════════════
-    // FILTROS — faixa animada (marquee) + arraste manual livre
+    // FILTROS — barra de categorias com rolagem nativa (sem animação
+    // automática e sem clones): o navegador cuida do arraste/toque, então o
+    // botão nunca é um "alvo em movimento" para o cliente clicar/tocar.
     // ═══════════════════════════════════════════════════
-    // Duplica o grupo de botões para criar um loop infinito sem costura visível.
-    // Precisa rodar ANTES de capturar ".filtro-btn" abaixo, pra que os botões
-    // clonados também recebam os listeners de clique.
-    (function initFiltrosMarquee() {
-      const viewport = document.getElementById('filtrosViewport');
-      const track    = document.getElementById('filtrosTrack');
-      const original = document.getElementById('filtros');
-      if (!viewport || !track || !original) return;
 
-      function criarCopia() {
-        const copia = original.cloneNode(true);
-        copia.removeAttribute('id');
-        copia.setAttribute('aria-hidden', 'true');
-        copia.querySelectorAll('button').forEach(b => b.setAttribute('tabindex', '-1'));
-        track.appendChild(copia);
-      }
-
-      let offset = 0;
-      let cicloWidth = 0;
-      let paused = false;
-      let dragging = false;
-      let dragMoved = false;
-      let startX = 0;
-      let startOffset = 0;
-      const VELOCIDADE = 0.35; // px por frame — deslocamento contínuo e suave
-
-      // Garante cópias suficientes para NUNCA expor a repetição na tela — em telas
-      // largas (desktop, TV, monitor grande) 1 única cópia extra não é suficiente,
-      // então preenche até o trilho cobrir pelo menos 2x a largura visível.
-      function garantirCopias() {
-        cicloWidth = original.getBoundingClientRect().width;
-        if (cicloWidth <= 0) return;
-        const larguraMinima = viewport.getBoundingClientRect().width * 2 + cicloWidth;
-        let guard = 0;
-        while (track.getBoundingClientRect().width < larguraMinima && guard < 50) {
-          criarCopia();
-          guard++;
-        }
-      }
-
-      criarCopia(); // pelo menos 1 cópia para permitir o loop
-      garantirCopias();
-      window.addEventListener('resize', garantirCopias);
-
-      function normalizar() {
-        // Mantém o offset sempre dentro de um ciclo (0 a cicloWidth) — funciona
-        // suavemente tanto girando sozinho (offset crescente) quanto no arraste
-        // manual em qualquer direção (offset pode subir ou descer livremente).
-        if (cicloWidth <= 0) return;
-        while (offset >= cicloWidth) offset -= cicloWidth;
-        while (offset < 0) offset += cicloWidth;
-      }
-
-      function aplicarTransform() {
-        track.style.transform = `translateX(${offset}px)`;
-      }
-
-      function tick() {
-        if (!paused && !dragging) {
-          offset += VELOCIDADE;
-          normalizar();
-          aplicarTransform();
-        }
-      }
-      setInterval(tick, 16); // ~60fps — roda de forma constante, independente de foco/visibilidade da aba
-
-      function dragStart(clientX) {
-        dragging = true;
-        dragMoved = false;
-        startX = clientX;
-        startOffset = offset;
-        viewport.classList.add('dragging');
-      }
-
-      function dragMove(clientX) {
-        if (!dragging) return;
-        const delta = clientX - startX;
-        if (Math.abs(delta) > 6) dragMoved = true;
-        offset = startOffset + delta;
-        normalizar();
-        aplicarTransform();
-      }
-
-      function dragEnd() {
-        if (!dragging) return;
-        dragging = false;
-        viewport.classList.remove('dragging');
-        // Retoma o movimento automático pouco depois de soltar
-        paused = true;
-        setTimeout(() => { paused = false; }, 700);
-      }
-
-      viewport.addEventListener('mousedown', (e) => { dragStart(e.clientX); e.preventDefault(); });
-      window.addEventListener('mousemove', (e) => dragMove(e.clientX));
-      window.addEventListener('mouseup', dragEnd);
-
-      viewport.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
-      viewport.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX), { passive: true });
-      viewport.addEventListener('touchend', dragEnd);
-
-      // Evita que o clique "vaze" para os botões quando o gesto foi um arraste
-      track.addEventListener('click', (e) => {
-        if (dragMoved) {
-          e.stopPropagation();
-          e.preventDefault();
-        }
-      }, true);
-    })();
-
-    const filtros = document.querySelectorAll('.filtro-btn');
     const cards   = document.querySelectorAll('.prod-card');
     const countEl = document.getElementById('count');
+    const secoes  = document.querySelectorAll('.menu-section');
 
-    function aplicarFiltro(cat) {
-      let visible = 0;
-      cards.forEach(card => {
-        const match = card.dataset.cat === cat;
-        card.classList.toggle('hidden', !match);
-        if (match) {
-          visible++;
-          card.style.animation = 'none';
-          card.offsetHeight; // reflow
-          card.style.animation = '';
-        }
-      });
-      countEl.textContent = `${visible} ${visible === 1 ? 'item' : 'itens'}`;
+    // Todos os produtos ficam sempre visíveis — a faixa de categorias serve
+    // apenas de navegação: clicar rola até a seção, e o botão ativo também
+    // acompanha a rolagem manual do usuário (scroll-spy), sem nunca esconder
+    // as demais categorias.
+    countEl.textContent = `${cards.length} itens no cardápio`;
+
+    function marcarAtiva(cat) {
+      document.querySelectorAll('.filtro-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+      // Mantém o botão ativo visível dentro da própria barra de categorias,
+      // rolando só o eixo horizontal do viewport da barra diretamente — usar
+      // scrollIntoView() aqui rolaria a PÁGINA TODA de volta ao topo, porque o
+      // botão vive dentro de um contêiner "position: sticky" e o navegador
+      // calcula a posição "nearest" a partir do local estático dele, não do
+      // local fixo onde ele realmente aparece na tela.
+      const viewport = document.getElementById('filtrosViewport');
+      const ativo = document.querySelector(`.filtro-btn[data-cat="${cat}"]`);
+      if (!viewport || !ativo) return;
+      const alvoScroll = ativo.offsetLeft - (viewport.clientWidth - ativo.offsetWidth) / 2;
+      viewport.scrollTo({ left: Math.max(0, alvoScroll), behavior: 'smooth' });
     }
 
-    filtros.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cat = btn.dataset.cat;
-        // Marca como ativo TODOS os botões dessa categoria (original + clone da faixa animada)
-        filtros.forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-        aplicarFiltro(cat);
-      });
+    // Delegação de evento: um único listener cobre todos os botões de categoria.
+    let scrollSpySuspenso = false;
+    let scrollSpyTimer = null;
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filtro-btn');
+      if (!btn) return;
+      const cat = btn.dataset.cat;
+      const alvo = document.getElementById(`cat-${cat}`);
+      if (!alvo) return;
+      marcarAtiva(cat);
+      // Suspende o scroll-spy durante a rolagem suave, evitando que o destaque
+      // "pisque" em outra categoria enquanto a página ainda está em movimento.
+      scrollSpySuspenso = true;
+      alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      clearTimeout(scrollSpyTimer);
+      scrollSpyTimer = setTimeout(() => { scrollSpySuspenso = false; }, 700);
     });
 
-    // Filtro inicial (categoria do botão ativo)
-    aplicarFiltro(document.querySelector('.filtro-btn.active').dataset.cat);
+    // Scroll-spy: destaca automaticamente o botão da categoria cuja seção está
+    // no topo da área visível enquanto o usuário rola a página manualmente.
+    if ('IntersectionObserver' in window && secoes.length) {
+      const spyObserver = new IntersectionObserver((entries) => {
+        if (scrollSpySuspenso) return;
+        const visiveis = entries.filter(en => en.isIntersecting);
+        if (!visiveis.length) return;
+        visiveis.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        marcarAtiva(visiveis[0].target.dataset.cat);
+      }, {
+        rootMargin: '-45% 0px -50% 0px', // faixa fina logo abaixo do header + filtros fixos
+        threshold: 0
+      });
+      secoes.forEach(sec => spyObserver.observe(sec));
+    }
 
     // ═══════════════════════════════════════════════════
     // CARRINHO
@@ -2767,8 +2757,21 @@
       const h = header.offsetHeight;
       document.documentElement.style.setProperty('--header-h', h + 'px');
     }
+
+    // Mede a altura real da faixa de filtros (também sticky, logo abaixo do
+    // header) para que o scroll até cada seção do cardápio pare no lugar
+    // certo, sem ficar escondida atrás dos dois elementos fixos.
+    function ajustarAlturaFiltros() {
+      const filtrosWrap = document.querySelector('.filtros-wrap');
+      if (!filtrosWrap) return;
+      const h = filtrosWrap.offsetHeight;
+      document.documentElement.style.setProperty('--filtros-h', h + 'px');
+    }
+
     ajustarAlturaHeader();
+    ajustarAlturaFiltros();
     window.addEventListener('resize', ajustarAlturaHeader);
+    window.addEventListener('resize', ajustarAlturaFiltros);
   </script>
 </body>
 
