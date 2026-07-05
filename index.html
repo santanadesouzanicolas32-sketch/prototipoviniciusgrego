@@ -58,13 +58,16 @@
     }
 
     /* Evita overflow horizontal em qualquer dispositivo.
-       overflow-y: visible é necessário aqui — sem ele o navegador computa
-       overflow-y como "auto" automaticamente (efeito colateral do overflow-x:
-       hidden), o que quebra o position:sticky do header e da barra de filtros. */
-    html, body {
+       O overflow-x:hidden fica só no <body> (não no <html>): quando as DUAS
+       tags têm overflow explícito, o navegador cria dois contêineres de
+       rolagem aninhados e o position:sticky do header/filtros passa a
+       "grudar" no <body> (que nunca rola de verdade) em vez do viewport real
+       — foi exatamente isso que quebrou o sticky. Deixando o <html> no valor
+       padrão, o navegador propaga o overflow do <body> para o viewport, sem
+       criar esse contêiner extra. */
+    body {
       max-width: 100%;
       overflow-x: hidden;
-      overflow-y: visible;
     }
 
     /* Imagens e mídia sempre fluidas */
@@ -2187,12 +2190,15 @@
     }
 
     // Delegação de evento: um único listener cobre todos os botões de categoria.
-    // O clique só destaca o botão — não move a página, para não criar aquele
-    // "pulo" de rolagem automática que atrapalha o uso no celular.
+    // O clique leva direto para a seção — sem precisar arrastar a tela — mas
+    // com um salto instantâneo (sem animação), para não criar aquele "pulo"
+    // de rolagem suave que ficava estranho no celular.
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.filtro-btn');
       if (!btn) return;
-      marcarAtiva(btn.dataset.cat);
+      const cat = btn.dataset.cat;
+      marcarAtiva(cat);
+      document.getElementById(`cat-${cat}`)?.scrollIntoView({ behavior: 'instant', block: 'start' });
     });
 
     // Scroll-spy: destaca automaticamente o botão da categoria cuja seção está
