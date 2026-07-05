@@ -2193,15 +2193,14 @@
     }
 
     // Delegação de evento: um único listener cobre todos os botões de categoria.
-    // O clique leva direto para a seção — sem precisar arrastar a tela — mas
-    // com um salto instantâneo (sem animação), para não criar aquele "pulo"
-    // de rolagem suave que ficava estranho no celular.
+    // O clique só destaca o botão — não move a tela. Rolar a página inteira ao
+    // clicar incomodava (jogava a tela pra baixo e obrigava a subir de novo
+    // na mão), então a navegação real continua sendo a rolagem manual do
+    // usuário, com o destaque acompanhando sozinho (scroll-spy abaixo).
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.filtro-btn');
       if (!btn) return;
-      const cat = btn.dataset.cat;
-      marcarAtiva(cat);
-      document.getElementById(`cat-${cat}`)?.scrollIntoView({ behavior: 'instant', block: 'start' });
+      marcarAtiva(btn.dataset.cat);
     });
 
     // Scroll-spy: destaca automaticamente o botão da categoria cuja seção está
