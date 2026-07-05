@@ -57,10 +57,14 @@
       box-sizing: border-box;
     }
 
-    /* Evita overflow horizontal em qualquer dispositivo */
+    /* Evita overflow horizontal em qualquer dispositivo.
+       overflow-y: visible é necessário aqui — sem ele o navegador computa
+       overflow-y como "auto" automaticamente (efeito colateral do overflow-x:
+       hidden), o que quebra o position:sticky do header e da barra de filtros. */
     html, body {
       max-width: 100%;
       overflow-x: hidden;
+      overflow-y: visible;
     }
 
     /* Imagens e mídia sempre fluidas */
@@ -2687,7 +2691,7 @@
         msg += `*${idx + 1}) ${item.name}* — qtd: ${item.qty}x\n`;
 
         if (item.isItemSimples) {
-          msg += `   • ${item.categoriaLabel} avulso(a)\n`;
+          msg += `   • ${item.categoriaLabel} ${item.categoriaLabel === 'Bebida' ? 'avulsa' : 'avulso'}\n`;
         } else {
           // Pão (sem preço)
           if (item.pao) {
