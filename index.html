@@ -432,6 +432,16 @@
       height: 280px;
     }
 
+    /* Fotos de produto recortado (fundo removido/transparente) — mostra a
+       lata/produto inteiro sem cortar, com o fundo do card aparecendo atrás.
+       Precisa da mesma especificidade de ".prod-card[data-cat] .prod-img-wrap
+       img" (repete o atributo) pra realmente vencer o object-fit:cover geral
+       de bebidas. */
+    .prod-card--cutout[data-cat="bebida"] .prod-img-wrap img {
+      object-fit: contain;
+      padding: 12px 0;
+    }
+
     /* Doces — fotos em formato retrato: caixa mais alta e sem corte, mostrando a imagem inteira */
     .prod-card[data-cat="doce"] .prod-img-wrap {
       height: 260px;
@@ -1859,9 +1869,9 @@
         </div>
       </div>
 
-      <div class="prod-card" data-cat="bebida" data-name="Guaraná Antarctica" data-price="7.00">
+      <div class="prod-card prod-card--cutout" data-cat="bebida" data-name="Guaraná Antarctica" data-price="7.00">
         <div class="prod-img-wrap">
-          <img src="https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=600&h=400&fit=crop"
+          <img src="assets/images/20-guarana-antarctica.webp"
             alt="Guaraná Antarctica" loading="lazy">
         </div>
         <div class="prod-body">
@@ -2185,14 +2195,14 @@
     }
 
     // Delegação de evento: um único listener cobre todos os botões de categoria.
-    // O clique só destaca o botão — não move a tela. Rolar a página inteira ao
-    // clicar incomodava (jogava a tela pra baixo e obrigava a subir de novo
-    // na mão), então a navegação real continua sendo a rolagem manual do
-    // usuário, com o destaque acompanhando sozinho (scroll-spy abaixo).
+    // O clique rola suavemente até a seção da categoria — sem isso os produtos
+    // não aparecem na tela e o cliente precisa arrastar tudo manualmente.
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.filtro-btn');
       if (!btn) return;
-      marcarAtiva(btn.dataset.cat);
+      const cat = btn.dataset.cat;
+      marcarAtiva(cat);
+      document.getElementById(`cat-${cat}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     // Scroll-spy: destaca automaticamente o botão da categoria cuja seção está
