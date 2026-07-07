@@ -1409,25 +1409,17 @@
 
     /* Ajustes gerais para modais em telas pequenas */
     @media (max-width: 640px) {
-      .pers-modal .pers-content,
       .cart-modal .cart-content {
         max-height: 92vh;
         border-radius: 16px 16px 0 0;
       }
 
-      .pers-header,
       .cart-header {
         padding: 16px 18px;
       }
 
-      .pers-body,
       .cart-body {
         padding: 16px 18px;
-      }
-
-      .pers-footer,
-      .cart-footer {
-        padding: 14px 18px;
       }
     }
 
@@ -1495,7 +1487,7 @@
     <p>Lanches artesanais preparados na hora, com ingredientes selecionados e aquele sabor que não tem igual.</p>
   </section>
 
-  <!-- ═══ FILTROS: Navegação por categoria. Todos os produtos ficam sempre visíveis — clicar num botão apenas rola a página suavemente até a seção correspondente, e o botão ativo acompanha a rolagem manual do usuário ═══ -->
+  <!-- ═══ FILTROS: Navegação por categoria. Todos os produtos ficam sempre visíveis — clicar num botão só destaca a categoria (não move a tela), e o botão ativo também acompanha a rolagem manual do usuário ═══ -->
   <div class="filtros-wrap">
     <div class="filtros-viewport" id="filtrosViewport">
       <div class="filtros-track" id="filtrosTrack">
@@ -2299,10 +2291,6 @@
       return carrinho.reduce((acc, i) => acc + i.qty, 0);
     }
 
-    function subtotalCarrinho() {
-      return carrinho.reduce((acc, i) => acc + (i.unitPrice * i.qty), 0);
-    }
-
     function formatBRL(v) {
       return 'R$ ' + v.toFixed(2).replace('.', ',');
     }
@@ -2344,7 +2332,7 @@
       const paoFrancesOption = document.querySelector('#persModal input[name="persPao"][value="Francês tradicional"]').closest('.pers-option');
       const paoGroup = paoBagueteOption.closest('.pers-group');
 
-      // Apenas o "Grego Tradicional" tem escolha de pão (francês incluso ou baguete +R$3)
+      // Apenas o "Grego Tradicional" tem escolha de pão (francês incluso ou baguete +R$5)
       const temEscolhaDePao = persAtual.name === 'Grego Tradicional';
 
       if (temEscolhaDePao) {
